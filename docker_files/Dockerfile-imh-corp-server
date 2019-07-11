@@ -1,0 +1,19 @@
+# Pull base image
+FROM python:3.7
+
+# Set environment varibles
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN mkdir /config
+ADD ./config/virtual_dependence/dependences.txt /config/
+RUN mkdir /src
+WORKDIR /src
+COPY . /src
+RUN rm -f src/imh_corp_server/local_settings.py
+
+
+RUN pip install --upgrade pip
+RUN /bin/bash -c "pip install uwsgi && pip install psycopg2 && pip install -r /config/dependences.txt"
+
+EXPOSE 8001/tcp

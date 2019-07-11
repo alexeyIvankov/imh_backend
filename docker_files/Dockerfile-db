@@ -1,0 +1,4 @@
+# Pull base image
+FROM postgres:10.1-alpine
+
+COPY ./config/postgresql/docker-db-init.sql /docker-entrypoint-initdb.d/docker-db-init.sql

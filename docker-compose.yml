@@ -1,0 +1,66 @@
+version: '3.6'
+
+volumes:
+     api_data:
+     postgres:
+     db-init-scripts:
+
+services:
+
+   nginx:
+      build:
+        context: ./
+        dockerfile: ./docker_files/Dockerfile-nginx
+      restart: always
+      container_name: nginx_server
+      volumes:
+        - api_data:/src
+        - ./logs_nginx:/var/log/nginx
+      ports:
+        - "80:80"
+      depends_on:
+        - imh_corp_server
+
+   pgadmin:
+      image: dpage/pgadmin4
+      container_name: pgadmin4
+      environment:
+        - PGADMIN_DEFAULT_EMAIL=user@domain.com
+        - PGADMIN_DEFAULT_PASSWORD=SuperSecret
+      volumes:
+        - /data/pgadmin:/roor/.pgadmin
+      ports:
+        - "5050:80"
+      depends_on:
+        - postgresql
+
+   postgresql:
+      build:
+        context: ./
+        dockerfile: ./docker_files/Dockerfile-db
+      restart: always
+      container_name: postgresql_server
+      ports:
+        - "5432:5432"
+      volumes: 
+        - postgres:/var/lib/postgresql:Z
+        - db-init-scripts:/docker-entrypoint-initdb.d
+         
+   imh_corp_server:
+      build: 
+        context: ./
+        dockerfile: ./docker_files/Dockerfile-imh-corp-server
+      restart: always
+      container_name: imh_corp_server
+      command: "/bin/bash ./build_scripts/prod_start"
+      environment:
+        IN_DOCKER: 1
+      volumes:
+        - api_data:/src
+        - ./logs/nginx/:/var/log/nginx
+      ports:
+        - "8001:8001"
+      
+      depends_on:
+        - postgresql
+

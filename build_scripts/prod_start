@@ -1,0 +1,21 @@
+#!/bin/bash
+
+NAME="imh_corp_server"
+WORKDIR=./src/
+
+echo "Starting $NAME"
+
+sleep 10
+cd $WORKDIR
+
+rm -rf logs/
+mkdir  logs/
+touch logs/debug.log
+chmod -R 777 logs/debug.log
+
+
+python manage.py makemigrations
+python manage.py migrate --noinput
+python manage.py collectstatic
+python super_user_builder.py
+uwsgi --ini imh_corp_server_uwsgi.ini
